@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: yojanatrack-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: yojanatrack
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d yojanatrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: yojanatrack-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: yojanatrack-server
+    ports:
+      - '5000:5000'
+    environment:
+      - DATABASE_URL=postgresql://postgres:password123@postgres:5432/yojanatrack?schema=public
+      - REDIS_URL=redis://redis:6379
+      - PORT=5000
+      - NODE_ENV=development
+      - JWT_SECRET=supersecretjwtkeyforlocaldev
+      - JWT_REFRESH_SECRET=supersecretrefreshkeyforlocaldev
+      - CLIENT_URL=http://localhost:5173
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    container_name: yojanatrack-client
+    ports:
+      - '5173:5173'
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+  redis_data:
