@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { matchSchemes } from '../schemes/api/schemes';
 import type { MatchEligibilityPayload } from '../schemes/api/schemes';
@@ -36,6 +36,9 @@ const OCCUPATIONS = [
   { value: 'Other', label: 'Other' }
 ];
 
+import { useQuery } from '@tanstack/react-query';
+import { getProfile } from './api/profile';
+
 export const EligibilityQuiz = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<MatchEligibilityPayload>({
@@ -45,6 +48,27 @@ export const EligibilityQuiz = () => {
     state: 'Maharashtra',
     occupation: 'Student'
   });
+
+  const { data: profile, isLoading: isProfileLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: getProfile,
+  });
+
+  useState(() => {
+    // Initial fetch trigger
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        age: profile.age ?? 25,
+        gender: profile.gender ?? 'MALE',
+        income: profile.income ?? 150000,
+        state: profile.state ?? 'Maharashtra',
+        occupation: profile.occupation ?? 'Student'
+      });
+    }
+  }, [profile]);
 
   const mutation = useMutation({
     mutationFn: matchSchemes,
@@ -90,6 +114,11 @@ export const EligibilityQuiz = () => {
             <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto text-lg">
               Answer 3 simple questions to instantly find all central and state welfare schemes you qualify for.
             </p>
+            {profile && (
+              <p className="text-sm text-blue-600 dark:text-blue-400 mt-3 font-semibold bg-blue-50/50 dark:bg-blue-900/10 inline-block px-4 py-1.5 rounded-full border border-blue-100 dark:border-blue-900/30">
+                👋 Form pre-filled from your profile. Changes here are for a one-off match check.
+              </p>
+            )}
           </div>
         )}
 

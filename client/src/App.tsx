@@ -4,6 +4,7 @@ import { SignupForm } from './features/auth/SignupForm';
 import { SchemesPage } from './features/schemes/SchemesPage';
 import { SchemeDetail } from './features/schemes/SchemeDetail';
 import { EligibilityQuiz } from './features/profile/EligibilityQuiz';
+import { ProfilePage } from './features/profile/ProfilePage';
 import { BookmarkList } from './features/bookmarks/BookmarkList';
 import { ApplicationTracker } from './features/tracker/ApplicationTracker';
 import { AdminDashboard } from './features/admin/AdminDashboard';
@@ -77,6 +78,7 @@ function App() {
         <Route path="/schemes" element={isAuthenticated ? <SchemesPage /> : <Navigate to="/login" />} />
         <Route path="/schemes/:slug" element={isAuthenticated ? <SchemeDetail /> : <Navigate to="/login" />} />
         <Route path="/find-scheme" element={isAuthenticated ? <EligibilityQuiz /> : <Navigate to="/login" />} />
+        <Route path="/profile" element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />} />
         <Route path="/bookmarks" element={isAuthenticated ? <BookmarkList /> : <Navigate to="/login" />} />
         <Route path="/tracker" element={isAuthenticated ? <ApplicationTracker /> : <Navigate to="/login" />} />
         <Route path="/admin" element={isAuthenticated && user?.role === 'ADMIN' ? <AdminDashboard /> : <Navigate to="/login" />} />

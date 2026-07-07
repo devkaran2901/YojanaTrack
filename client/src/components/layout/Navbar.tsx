@@ -9,6 +9,7 @@ import {
   User as UserIcon,
   ShieldCheck
 } from 'lucide-react';
+import { NotificationBell } from '../../features/notifications/components/NotificationBell';
 
 export const Navbar = () => {
   const location = useLocation();
@@ -65,7 +66,8 @@ export const Navbar = () => {
 
           {/* User Profile / Action */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50">
+            <NotificationBell />
+            <Link to="/profile" className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all active:scale-95" title="View Profile">
               {user?.role === 'ADMIN' ? (
                 <ShieldCheck className="w-4 h-4 text-red-500" />
               ) : (
@@ -74,7 +76,7 @@ export const Navbar = () => {
               <span className="text-xs font-bold text-gray-700 dark:text-gray-300 max-w-[100px] truncate">
                 {user?.role === 'ADMIN' ? 'Admin Portal' : 'Citizen'}
               </span>
-            </div>
+            </Link>
 
             <button
               onClick={() => logout()}
