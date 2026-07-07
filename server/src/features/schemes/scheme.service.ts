@@ -1,7 +1,19 @@
 import { Scheme } from '../../models/Scheme';
 import { User } from '../../models/User';
+import { redis } from '../../lib/redis';
 
 export class SchemeService {
+  static async invalidateCache() {
+    try {
+      const keys = await redis.keys('schemes:*');
+      if (keys.length > 0) {
+        await redis.del(...keys);
+      }
+    } catch (err) {
+      // Graceful degradation when Redis is unavailable
+    }
+  }
+
   static async getSchemes(filters: any) {
     const page = parseInt(filters.page || '1');
     const limit = parseInt(filters.limit || '10');
@@ -21,12 +33,25 @@ export class SchemeService {
     // Only active schemes by default
     query.isActive = true;
 
+    // Generate deterministic cache key based on query filters
+    const sortedKeys = Object.keys(filters).sort();
+    const cacheKey = 'schemes:' + sortedKeys.map(k => `${k}=${filters[k]}`).join('&');
+
+    try {
+      const cached = await redis.get(cacheKey);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (err) {
+      // Graceful degradation when Redis is unavailable
+    }
+
     const [schemes, total] = await Promise.all([
       Scheme.find(query).sort({ title: 1 }).skip(skip).limit(limit).lean(),
       Scheme.countDocuments(query),
     ]);
 
-    return {
+    const result = {
       schemes,
       pagination: {
         total,
@@ -35,6 +60,14 @@ export class SchemeService {
         totalPages: Math.ceil(total / limit),
       }
     };
+
+    try {
+      await redis.setex(cacheKey, 300, JSON.stringify(result)); // 5 minutes TTL
+    } catch (err) {
+      // Graceful degradation when Redis is unavailable
+    }
+
+    return result;
   }
 
   static async getSchemeBySlug(slug: string) {
@@ -85,6 +118,7 @@ export class SchemeService {
     }
 
     const created = await Scheme.create({ ...data, slug });
+    await this.invalidateCache();
     return created.toObject();
   }
 
@@ -114,6 +148,7 @@ export class SchemeService {
 
     Object.assign(scheme, { ...data, slug });
     await scheme.save();
+    await this.invalidateCache();
     return scheme.toObject();
   }
 
@@ -122,6 +157,7 @@ export class SchemeService {
     if (!scheme) throw { statusCode: 404, message: 'Scheme not found' };
 
     await Scheme.deleteOne({ _id: id });
+    await this.invalidateCache();
     return { success: true };
   }
 }

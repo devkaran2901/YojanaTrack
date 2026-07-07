@@ -1,22 +1,13 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: yojanatrack-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: yojanatrack
+  mongodb:
+    image: mongo:6-jammy
+    container_name: yojanatrack-mongodb
     ports:
-      - '5433:5432'
+      - '27017:27017'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d yojanatrack"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - mongodb_data:/data/db
 
   redis:
     image: redis:7-alpine
@@ -35,7 +26,7 @@ services:
     ports:
       - '5000:5000'
     environment:
-      - DATABASE_URL=postgresql://postgres:password123@postgres:5432/yojanatrack?schema=public
+      - MONGODB_URI=mongodb://mongodb:27017/yojanatrack
       - REDIS_URL=redis://redis:6379
       - PORT=5000
       - NODE_ENV=development
@@ -46,10 +37,8 @@ services:
       - ./server:/app
       - /app/node_modules
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - mongodb
+      - redis
 
   client:
     build:
@@ -67,5 +56,5 @@ services:
       - server
 
 volumes:
-  postgres_data:
+  mongodb_data:
   redis_data:

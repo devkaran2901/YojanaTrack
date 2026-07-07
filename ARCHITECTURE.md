@@ -8,10 +8,10 @@ This document outlines the complete tech stack, directory structure, and the adv
 
 ## 🛠️ The Tech Stack
 
-YojanaTrack is built on a modern, decoupled **React-Express-PostgreSQL (PERN)** stack optimized for absolute type safety and responsiveness.
+YojanaTrack is built on a modern, decoupled **MERN (MongoDB, Express, React, Node.js)** stack optimized for absolute type safety and responsiveness.
 
 ### 1. Frontend Architecture
-*   **React 18 + Vite**: Leverages Vite's extremely fast ESBuild-based HMR (Hot Module Replacement) and optimized production Rollup builds.
+*   **React 19 + Vite**: Leverages Vite's extremely fast ESBuild-based HMR (Hot Module Replacement) and optimized production Rollup builds.
 *   **TypeScript**: Complete compile-time type checking for application state, UI components, and API contracts.
 *   **Tailwind CSS (v3) + PostCSS**: Utility-first CSS styling designed to build highly customizable, glassmorphic interfaces without bloat.
 *   **Lucide React**: Vector-based, lightweight dynamic icons.
@@ -21,9 +21,9 @@ YojanaTrack is built on a modern, decoupled **React-Express-PostgreSQL (PERN)** 
 
 ### 2. Backend Infrastructure
 *   **Node.js & Express.js**: Fully modular REST API written entirely in TypeScript using `ts-node-dev` for high-velocity local development.
-*   **Prisma ORM**: A next-generation type-safe database mapping layer (object-relational mapper) that syncs our schema directly with TypeScript models.
-*   **PostgreSQL**: High-availability relational database managing schemas, bookmarks, and trackers.
-*   **Redis**: In-memory data store utilized for fast caching of scheme details, sessions, and future rate-limiter syncs.
+*   **Mongoose ODM**: A robust MongoDB object data modeling tool that provides schema validation, business logic hooks, and clean TypeScript interfaces.
+*   **MongoDB**: High-availability document-oriented NoSQL database managing user profiles, schemes, bookmarks, and application tracking.
+*   **Redis (Planned / Future Work)**: Planned in-memory data store for caching scheme details, sessions, and distributed rate-limiting.
 *   **Winston**: Professional-grade transport logging framework with structured JSON/Console output for log tracking.
 
 ### 3. Security Framework
@@ -64,12 +64,12 @@ Using Zod, we implement "Parse, Don't Validate". Instead of simple conditionals,
 *   On the **backend**, schemas are mapped to Express request objects (`body`, `query`, or `params`). Requests that fail schemas are instantly rejected in a unified validation middleware before they ever touch the database, protecting it from malformed queries.
 *   On the **frontend**, Zod schemas mirror Zod's backend validation schemas. React Hook Form leverages this to prevent submitting forms unless the local fields conform exactly to what the database expects, ensuring visual consistency and performance.
 
-### 4. Advanced Database Seeding & Relational Mapping
-Utilizing Prisma schema definitions, we've designed models to map user relationships to government yojanas.
-*   The `seed.ts` script uses highly optimized cryptographic hashes (`bcryptjs` with 10 salt-rounds) to initialize administrative and standard user accounts.
-*   Prisma handles complex relational mappings—such as bookmarks and application tracking—using foreign key constraints that automatically map scheme schemas to user accounts.
+### 4. Advanced Database Seeding & Data Validation
+Utilizing Mongoose schema definitions, we've designed models to map user relationships to government yojanas.
+*   The `seedMongo.ts` script uses highly optimized cryptographic hashes (`bcryptjs` with 10 salt-rounds) to initialize administrative and standard user accounts.
+*   MongoDB references handles relational mappings—such as bookmarks and application tracking—using document IDs that reference schemes and user accounts.
 
 ### 5. Loopback Resolution & CORS Defense
 To prevent common local development blockades where modern browsers resolve `localhost` over IPv6 (`::1`) while local Node processes bind to IPv4 (`127.0.0.1`), we:
 *   Set the client API endpoint to explicitly target the IPv4 loopback (`127.0.0.1`), eliminating DNS lookup delays and browser socket rejection.
-*   Configure CORS to allow dynamic multi-origin arrays, making the application cross-origin resilient whether the user launches on `127.0.0.1` or `localhost`.
+*   Configure CORS to allow dynamic multi-origin arrays, making the application cross-origin resilient whether the user launches on `127.0.0.1` or `localhost` (including both port `5173` and `5174`).

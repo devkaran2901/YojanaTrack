@@ -6,14 +6,15 @@ export class TrackerService {
     return ApplicationTrack.find({ userId }).populate({ path: 'schemeId', model: Scheme }).sort({ updatedAt: -1 }).lean();
   }
 
-  static async upsertTrack(userId: string, schemeId: string, status: string, notes?: string) {
+  static async upsertTrack(userId: string, schemeId: string, status: any, notes?: string) {
     const scheme = await Scheme.findById(schemeId).lean();
     if (!scheme) throw { statusCode: 404, message: 'Scheme not found' };
 
     try {
-      const created = await ApplicationTrack.create({ userId, schemeId, status, notes });
-      await created.populate({ path: 'schemeId', model: Scheme });
-      return created.toObject();
+      const track = new ApplicationTrack({ userId, schemeId, status, notes });
+      await track.save();
+      await track.populate({ path: 'schemeId', model: Scheme });
+      return track.toObject();
     } catch (err: any) {
       // Duplicate -> update existing
       if (err.code === 11000) {

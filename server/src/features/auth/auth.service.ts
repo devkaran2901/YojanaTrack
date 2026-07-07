@@ -45,7 +45,7 @@ export class AuthService {
         throw new Error('Token expired or revoked');
       }
 
-      return this.generateTokens(decoded.id, decoded.role);
+      return this.generateTokens(decoded.id, decoded.role as 'USER' | 'ADMIN');
     } catch (err) {
       throw { statusCode: 401, message: 'Invalid refresh token' };
     }
@@ -60,6 +60,7 @@ export class AuthService {
     const refreshToken = jwt.sign({ id: userId, role }, env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
     // Store refresh token in DB
+    await RefreshToken.deleteOne({ token: refreshToken });
     await RefreshToken.create({
       userId,
       token: refreshToken,
