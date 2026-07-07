@@ -1,8 +1,7 @@
 const express  = require("express");
 const router   = express.Router();
 const Scheme   = require("../models/Scheme");
-const ScrapeLog= require("../models/ScrapeLog");
-const { runFullScrape } = require("../scraper/index");
+
 
 // ─────────────────────────────────────────────
 // GET /api/schemes
@@ -97,31 +96,6 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
-// POST /api/schemes/scrape/run  (admin only)
-// Manually trigger a scrape run
-// ─────────────────────────────────────────────
-router.post("/scrape/run", async (req, res) => {
-  try {
-    res.json({ message: "Scrape job started in background" });
-    // Run async — don't await, just fire
-    runFullScrape().catch(console.error);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
-// ─────────────────────────────────────────────
-// GET /api/schemes/scrape/logs
-// View last 20 scrape run logs
-// ─────────────────────────────────────────────
-router.get("/scrape/logs", async (req, res) => {
-  try {
-    const logs = await ScrapeLog.find().sort({ ranAt: -1 }).limit(20);
-    res.json(logs);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 module.exports = router;

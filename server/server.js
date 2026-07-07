@@ -6,7 +6,7 @@ require("dotenv").config();
 const schemesRouter      = require("./routes/schemes");
 const adminSchemesRouter = require("./routes/adminSchemes");
 const authRouter         = require("./routes/auth");
-const { startScheduler } = require("./scraper/index");
+
 
 const app = express();
 
@@ -34,8 +34,6 @@ mongoose
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
 
-      // Start the daily cron scraper
-      startScheduler();
     });
   })
   .catch((err) => {
