@@ -20,6 +20,22 @@ export class TrackerController {
     }
   }
 
+  static async getUpcomingDeadlines(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) throw { statusCode: 401, message: 'Unauthorized' };
+
+      const data = await TrackerService.getUpcomingDeadlines(userId);
+      res.status(200).json({
+        success: true,
+        data,
+        error: null,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async upsertTrack(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user?.id;

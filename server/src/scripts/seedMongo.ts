@@ -214,7 +214,12 @@ const seed = async () => {
       },
     ];
 
-    await Scheme.insertMany(schemes);
+    const schemesWithDate = schemes.map(s => ({
+      ...s,
+      verifiedAt: new Date('2026-05-20'),
+    }));
+
+    await Scheme.insertMany(schemesWithDate);
     console.log(`✅ Created ${schemes.length} sample schemes\n`);
 
     console.log('🎉 Database seeding completed successfully!');

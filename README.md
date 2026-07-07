@@ -17,10 +17,12 @@ eligibility criteria.
 - 📱 Responsive design for mobile and desktop
 
 ## 🛠️ Tech Stack
-- **Frontend:** React.js, CSS
-- **Backend:** Node.js, Express.js
-- **Database:** (add yours here — MongoDB / PostgreSQL)
-- **Auth:** (add yours — JWT / Sessions)
+- **Frontend:** React, Vite, TypeScript, Vanilla CSS, TailwindCSS (optional/configured)
+- **Backend:** Node.js, Express, TypeScript, Zod request validation
+- **Database:** MongoDB + Mongoose
+- **Caching:** Redis (gracefully degrading key-value store)
+- **Testing:** Jest + Supertest (sequential execution with `--runInBand`)
+- **CI/CD:** GitHub Actions (compilation & automated test runners)
 
 ## 🚀 Getting Started
 
@@ -45,6 +47,16 @@ cd server && npm run dev
 
 # Start frontend (new terminal)
 cd client && npm run dev
+
+## 🗺️ Known Limitations & Future Roadmap
+
+To keep the application honest about its current state and outline clear directions for production scaling, we have documented the following architectural constraints and roadmap items:
+
+- **Static Seed Data vs. Live Integrations**: Currently, schemes are manually seeded and updated by administrators. The next phase is to integrate with government endpoints or deploy scrapers to automatically synchronize with active central/state database registries.
+- **Rule-Based Matching vs. ML Recommendation**: Eligibility checks are computed using structured rule matching based on specific criteria. Future improvements will utilize machine learning models to suggest schemes based on historical demographics and correlation vectors.
+- **Localization (i18n)**: Currently, the portal is English-only. Translating the portal to Hindi and other regional languages (e.g. Marathi, Tamil) is a priority to make it fully accessible to the general public.
+- **Infrastructure Scaling**: The app currently assumes a single-region deployment. Multi-region DB replication and CDN edge caching are planned to support high concurrent usage across different Indian states.
+- **Production Notification Scheduler**: The daily deadline checking mechanism runs via a scheduled GitHub Action scaffold. In production, this will be migrated to a dedicated worker scheduler (e.g. BullMQ / Redis) triggering a transactional mailer service (e.g. SendGrid).
 
 ## 📌 Inspired By
 The gaps found in myscheme.gov.in — built to provide a faster,

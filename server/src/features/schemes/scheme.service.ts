@@ -87,15 +87,95 @@ export class SchemeService {
 
     const schemes = await Scheme.find({ isActive: true }).lean();
 
-    return schemes.filter((scheme: any) => {
-      if (scheme.minAge != null && data.age < scheme.minAge) return false;
-      if (scheme.maxAge != null && data.age > scheme.maxAge) return false;
-      if (scheme.maxIncome != null && data.income > scheme.maxIncome) return false;
-      if (scheme.gender && scheme.gender !== 'ALL' && scheme.gender !== data.gender) return false;
-      if (scheme.state && scheme.state !== data.state) return false;
-      if (scheme.occupation && scheme.occupation !== data.occupation) return false;
-      return true;
+    const scoredSchemes = schemes.map((scheme: any) => {
+      const details: { criterion: string; passed: boolean; reason?: string }[] = [];
+      let totalApplicable = 0;
+      let totalPassed = 0;
+
+      // 1. Min Age Check
+      if (scheme.minAge != null) {
+        totalApplicable++;
+        const passed = data.age >= scheme.minAge;
+        if (passed) totalPassed++;
+        details.push({
+          criterion: 'minAge',
+          passed,
+          reason: passed ? undefined : `You must be at least ${scheme.minAge} years old (you are ${data.age})`,
+        });
+      }
+
+      // 2. Max Age Check
+      if (scheme.maxAge != null) {
+        totalApplicable++;
+        const passed = data.age <= scheme.maxAge;
+        if (passed) totalPassed++;
+        details.push({
+          criterion: 'maxAge',
+          passed,
+          reason: passed ? undefined : `Age limit is ${scheme.maxAge} years (you are ${data.age})`,
+        });
+      }
+
+      // 3. Max Income Check
+      if (scheme.maxIncome != null) {
+        totalApplicable++;
+        const passed = data.income <= scheme.maxIncome;
+        if (passed) totalPassed++;
+        details.push({
+          criterion: 'maxIncome',
+          passed,
+          reason: passed ? undefined : `Your annual income exceeds the limit by ₹${(data.income - scheme.maxIncome).toLocaleString('en-IN')}`,
+        });
+      }
+
+      // 4. Gender Check
+      if (scheme.gender && scheme.gender !== 'ALL') {
+        totalApplicable++;
+        const passed = scheme.gender.toUpperCase() === data.gender.toUpperCase();
+        if (passed) totalPassed++;
+        details.push({
+          criterion: 'gender',
+          passed,
+          reason: passed ? undefined : `Scheme is only available for ${scheme.gender} applicants (you selected ${data.gender})`,
+        });
+      }
+
+      // 5. State Check
+      if (scheme.state && scheme.state !== 'National') {
+        totalApplicable++;
+        const passed = scheme.state.toUpperCase() === data.state.toUpperCase();
+        if (passed) totalPassed++;
+        details.push({
+          criterion: 'state',
+          passed,
+          reason: passed ? undefined : `Scheme is only available in ${scheme.state} (you are in ${data.state})`,
+        });
+      }
+
+      // 6. Occupation Check
+      if (scheme.occupation && scheme.occupation !== '') {
+        totalApplicable++;
+        const passed = scheme.occupation.toUpperCase() === data.occupation.toUpperCase();
+        if (passed) totalPassed++;
+        details.push({
+          criterion: 'occupation',
+          passed,
+          reason: passed ? undefined : `Scheme is restricted to ${scheme.occupation} (you selected ${data.occupation})`,
+        });
+      }
+
+      const matchScore = totalApplicable === 0 ? 1 : totalPassed / totalApplicable;
+
+      return {
+        ...scheme,
+        matchScore,
+        totalApplicable,
+        totalPassed,
+        details,
+      };
     });
+
+    return scoredSchemes.sort((a, b) => b.matchScore - a.matchScore);
   }
 
   static async createScheme(data: any) {

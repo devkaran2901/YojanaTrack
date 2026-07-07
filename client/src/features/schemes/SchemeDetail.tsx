@@ -131,9 +131,17 @@ export const SchemeDetail = () => {
             {scheme.title}
           </h1>
           
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-            <Building2 className="w-5 h-5 text-gray-400" />
-            <span className="font-medium">{scheme.ministry}</span>
+          <div className="flex flex-wrap items-center gap-6 mt-6 pt-6 border-t border-gray-100 dark:border-gray-700/60 text-gray-600 dark:text-gray-300 text-sm">
+            <div className="flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-gray-400" />
+              <span className="font-semibold">{scheme.ministry}</span>
+            </div>
+            {scheme.verifiedAt && (
+              <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span>Verified as of: <strong>{new Date(scheme.verifiedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</strong></span>
+              </div>
+            )}
           </div>
         </div>
       </div>

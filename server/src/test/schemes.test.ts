@@ -140,7 +140,7 @@ describe('Schemes and Eligibility Flow', () => {
   });
 
   describe('POST /api/schemes/match', () => {
-    it('should successfully match eligible schemes based on profile', async () => {
+    it('should successfully match eligible schemes based on profile (Full Match)', async () => {
       const res = await request(app)
         .post('/api/schemes/match')
         .set('Authorization', `Bearer ${userToken}`)
@@ -156,10 +156,12 @@ describe('Schemes and Eligibility Flow', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.data).toHaveLength(1);
       expect(res.body.data[0].title).toBe(testScheme.title);
+      expect(res.body.data[0].matchScore).toBe(1);
+      expect(res.body.data[0].totalPassed).toBe(res.body.data[0].totalApplicable);
     });
 
-    it('should filter out schemes where user is ineligible', async () => {
-      // User is ineligible because income is too high (700000 > 600000)
+    it('should return a partial match with details on failure', async () => {
+      // User is partially eligible (income 700000 > 600000, but age 25 is within 18-70)
       const res = await request(app)
         .post('/api/schemes/match')
         .set('Authorization', `Bearer ${userToken}`)
@@ -173,7 +175,57 @@ describe('Schemes and Eligibility Flow', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data).toHaveLength(0);
+      expect(res.body.data).toHaveLength(1);
+      expect(res.body.data[0].title).toBe(testScheme.title);
+      expect(res.body.data[0].matchScore).toBeLessThan(1);
+      expect(res.body.data[0].matchScore).toBeCloseTo(0.6666, 2); // 2/3 criteria met
+      
+      const incomeDetail = res.body.data[0].details.find((d: any) => d.criterion === 'maxIncome');
+      expect(incomeDetail).toBeDefined();
+      expect(incomeDetail.passed).toBe(false);
+      expect(incomeDetail.reason).toContain('exceeds the limit');
+    });
+
+    it('should return a zero match score when all criteria are failed', async () => {
+      // Create a scheme that the user will fail completely
+      await Scheme.create({
+        title: 'Highly Restricted Scheme',
+        slug: 'highly-restricted-scheme',
+        description: 'For testing zero match.',
+        category: 'Education',
+        state: 'Kerala',
+        minAge: 60,
+        maxIncome: 100000,
+        gender: 'FEMALE',
+        occupation: 'Farmer',
+        benefits: 'None',
+        documentsRequired: [],
+        isActive: true,
+      });
+
+      const res = await request(app)
+        .post('/api/schemes/match')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          age: 25, // Fails minAge (60)
+          income: 500000, // Fails maxIncome (100000)
+          gender: 'MALE', // Fails gender (FEMALE)
+          state: 'National', // Fails state (Kerala)
+          occupation: 'STUDENT', // Fails occupation (Farmer)
+        });
+
+      expect(res.status).toBe(200);
+      
+      // Find the restricted scheme in results
+      const restricted = res.body.data.find((s: any) => s.slug === 'highly-restricted-scheme');
+      expect(restricted).toBeDefined();
+      expect(restricted.matchScore).toBe(0);
+      expect(restricted.totalPassed).toBe(0);
+      
+      // All 5 applicable criteria should have failed
+      expect(restricted.totalApplicable).toBe(5);
+      const allFailed = restricted.details.every((d: any) => d.passed === false);
+      expect(allFailed).toBe(true);
     });
   });
 });

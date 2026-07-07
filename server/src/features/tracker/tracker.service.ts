@@ -6,6 +6,19 @@ export class TrackerService {
     return ApplicationTrack.find({ userId }).populate({ path: 'schemeId', model: Scheme }).sort({ updatedAt: -1 }).lean();
   }
 
+  static async getUpcomingDeadlines(userId: string) {
+    const tracks = await ApplicationTrack.find({ userId }).populate({ path: 'schemeId', model: Scheme }).lean();
+    const now = new Date();
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(now.getDate() + 7);
+
+    return tracks.filter((track: any) => {
+      if (!track.schemeId || !track.schemeId.deadline) return false;
+      const deadlineDate = new Date(track.schemeId.deadline);
+      return deadlineDate >= now && deadlineDate <= sevenDaysFromNow;
+    });
+  }
+
   static async upsertTrack(userId: string, schemeId: string, status: any, notes?: string) {
     const scheme = await Scheme.findById(schemeId).lean();
     if (!scheme) throw { statusCode: 404, message: 'Scheme not found' };

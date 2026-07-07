@@ -268,9 +268,9 @@ export const EligibilityQuiz = () => {
                 <div className="inline-grid place-items-center w-16 h-16 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-full mb-4">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">Perfect Matches Found!</h2>
+                <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">Your Eligibility Matches</h2>
                 <p className="text-gray-500 dark:text-gray-400 mt-2 text-md">
-                  We compared your profile against all active welfare databases. Here are the customized government schemes you are eligible for:
+                  We compared your profile against all active databases. Here are the matching schemes sorted by eligibility score:
                 </p>
               </div>
 

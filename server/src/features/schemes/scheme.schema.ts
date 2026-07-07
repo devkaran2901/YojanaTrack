@@ -34,7 +34,43 @@ export const createSchemeSchema = z.object({
   applicationUrl: z.string().url('Invalid URL').nullable().optional().or(z.literal('')),
   ministry: z.string().nullable().optional(),
   isActive: z.boolean().optional(),
+  verifiedAt: z.preprocess((val) => (val ? new Date(val as string) : null), z.date().nullable().optional()),
+  deadline: z.preprocess((val) => (val ? new Date(val as string) : null), z.date().nullable().optional()),
 });
 
 export const updateSchemeSchema = createSchemeSchema.partial();
+
+const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+
+// Route-level schemas (validating entire request object)
+export const schemeQueryRouteSchema = z.object({
+  query: schemeQuerySchema,
+});
+
+export const matchEligibilityRouteSchema = z.object({
+  body: matchEligibilitySchema,
+});
+
+export const createSchemeRouteSchema = z.object({
+  body: createSchemeSchema,
+});
+
+export const updateSchemeRouteSchema = z.object({
+  params: z.object({
+    id: z.string().regex(objectIdRegex, 'Invalid scheme ID format'),
+  }),
+  body: updateSchemeSchema,
+});
+
+export const deleteSchemeRouteSchema = z.object({
+  params: z.object({
+    id: z.string().regex(objectIdRegex, 'Invalid scheme ID format'),
+  }),
+});
+
+export const getSchemeBySlugRouteSchema = z.object({
+  params: z.object({
+    slug: z.string().min(1, 'Slug is required'),
+  }),
+});
 

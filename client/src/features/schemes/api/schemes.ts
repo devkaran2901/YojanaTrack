@@ -17,6 +17,12 @@ export interface Scheme {
   applicationUrl: string;
   ministry: string;
   isActive?: boolean;
+  matchScore?: number;
+  totalApplicable?: number;
+  totalPassed?: number;
+  details?: { criterion: string; passed: boolean; reason?: string }[];
+  verifiedAt?: string | null;
+  deadline?: string | null;
 }
 
 export interface SchemesResponse {

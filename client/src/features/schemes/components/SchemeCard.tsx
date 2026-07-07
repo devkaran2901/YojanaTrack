@@ -36,9 +36,45 @@ export const SchemeCard = ({ scheme }: SchemeCardProps) => {
           {scheme.title}
         </h3>
         
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-6 line-clamp-3 leading-relaxed">
+        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed">
           {scheme.description}
         </p>
+
+        {scheme.matchScore !== undefined && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-gray-500 dark:text-gray-400">ELIGIBILITY SCORE</span>
+              <span className={`text-xs font-extrabold px-2.5 py-0.5 rounded-full ${
+                scheme.matchScore === 1 
+                  ? 'bg-green-150 text-green-800 dark:bg-green-950/40 dark:text-green-300 border border-green-200/30' 
+                  : scheme.matchScore >= 0.5 
+                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/30' 
+                    : 'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300 border border-red-200/30'
+              }`}>
+                {Math.round(scheme.matchScore * 100)}% Match
+              </span>
+            </div>
+            <div className="w-full bg-gray-150 dark:bg-gray-700/60 h-1.5 rounded-full overflow-hidden">
+              <div 
+                className={`h-full rounded-full transition-all duration-500 ${
+                  scheme.matchScore === 1 ? 'bg-green-500' : scheme.matchScore >= 0.5 ? 'bg-amber-500' : 'bg-red-500'
+                }`}
+                style={{ width: `${scheme.matchScore * 100}%` }}
+              />
+            </div>
+            {/* Show failed criteria list if not full match */}
+            {scheme.matchScore < 1 && scheme.details && (
+              <div className="mt-3 space-y-1 bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
+                <span className="text-[10px] font-extrabold text-rose-500 dark:text-rose-400 uppercase tracking-wider block mb-1">Near-Miss Reasons:</span>
+                {scheme.details.filter(d => !d.passed).map((d, idx) => (
+                  <p key={idx} className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+                    • {d.reason}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         
         <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
           <div className="flex flex-col">

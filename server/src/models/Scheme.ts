@@ -17,6 +17,8 @@ export interface IScheme extends Document {
   applicationUrl?: string | null;
   ministry?: string | null;
   isActive: boolean;
+  verifiedAt?: Date | null;
+  deadline?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +40,8 @@ const schemeSchema = new Schema<IScheme>(
     applicationUrl: String,
     ministry: String,
     isActive: { type: Boolean, default: true },
+    verifiedAt: { type: Date, default: Date.now },
+    deadline: { type: Date, default: null },
   },
   { timestamps: true }
 );

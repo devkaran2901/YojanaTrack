@@ -54,6 +54,7 @@ const schemeFormSchema = z.object({
   applicationUrl: z.string().nullable().optional().or(z.literal('')),
   ministry: z.string().nullable().optional().transform(val => val === '' ? null : val),
   isActive: z.boolean().optional().default(true),
+  verifiedAt: z.string().optional().default(() => new Date().toISOString().split('T')[0]),
 });
 
 type SchemeFormValues = z.infer<typeof schemeFormSchema>;
@@ -96,6 +97,7 @@ export const AdminDashboard = () => {
       applicationUrl: '',
       ministry: '',
       isActive: true,
+      verifiedAt: new Date().toISOString().split('T')[0],
     },
   });
 
@@ -192,6 +194,7 @@ export const AdminDashboard = () => {
       applicationUrl: scheme.applicationUrl || '',
       ministry: scheme.ministry || '',
       isActive: scheme.isActive ?? true,
+      verifiedAt: scheme.verifiedAt ? new Date(scheme.verifiedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     });
     setIsModalOpen(true);
   };
@@ -213,6 +216,7 @@ export const AdminDashboard = () => {
       applicationUrl: '',
       ministry: '',
       isActive: true,
+      verifiedAt: new Date().toISOString().split('T')[0],
     });
     setIsModalOpen(true);
   };
@@ -542,7 +546,7 @@ export const AdminDashboard = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400">Occupation Restriction</label>
                     <input
@@ -554,6 +558,15 @@ export const AdminDashboard = () => {
                     {!!errors.occupation && <p className="text-xs text-red-500">{errors.occupation.message as string}</p>}
                   </div>
 
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400">Last Verified Date</label>
+                    <input
+                      {...register('verifiedAt')}
+                      type="date"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white outline-none text-sm"
+                    />
+                  </div>
+
                   <div className="flex items-center gap-3 pt-6">
                     <input
                       {...register('isActive')}
@@ -562,7 +575,7 @@ export const AdminDashboard = () => {
                       className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <label htmlFor="isActive" className="text-sm font-bold text-gray-700 dark:text-gray-300">
-                      Enable scheme immediately for matching quiz roster
+                      Enable scheme immediately
                     </label>
                   </div>
                 </div>
