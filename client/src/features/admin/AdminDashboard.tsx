@@ -79,7 +79,7 @@ export const AdminDashboard = () => {
     control,
     reset,
     formState: { errors },
-  } = useForm<SchemeFormValues>({
+  } = useForm<any>({
     resolver: zodResolver(schemeFormSchema),
     defaultValues: {
       title: '',
@@ -418,7 +418,7 @@ export const AdminDashboard = () => {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
                     placeholder="Pradhan Mantri Kaushal Vikas Yojana"
                   />
-                  {errors.title && <p className="text-xs text-red-500 font-semibold">{errors.title.message}</p>}
+                  {!!errors.title && <p className="text-xs text-red-500 font-semibold">{errors.title.message as string}</p>}
                 </div>
 
                 <div className="space-y-1">
@@ -434,7 +434,7 @@ export const AdminDashboard = () => {
                     <option value="Housing">Housing & Infrastructure</option>
                     <option value="Employment">Employment & Welfare</option>
                   </select>
-                  {errors.category && <p className="text-xs text-red-500 font-semibold">{errors.category.message}</p>}
+                  {!!errors.category && <p className="text-xs text-red-500 font-semibold">{errors.category.message as string}</p>}
                 </div>
               </div>
 
@@ -447,7 +447,7 @@ export const AdminDashboard = () => {
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
                   placeholder="Provide comprehensive details about the scheme's goals, scope, and summary..."
                 />
-                {errors.description && <p className="text-xs text-red-500 font-semibold">{errors.description.message}</p>}
+                {!!errors.description && <p className="text-xs text-red-500 font-semibold">{errors.description.message as string}</p>}
               </div>
 
               {/* Scope & Ministry */}
@@ -460,7 +460,7 @@ export const AdminDashboard = () => {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
                     placeholder="Ministry of Skill Development"
                   />
-                  {errors.ministry && <p className="text-xs text-red-500 font-semibold">{errors.ministry.message}</p>}
+                  {!!errors.ministry && <p className="text-xs text-red-500 font-semibold">{errors.ministry.message as string}</p>}
                 </div>
 
                 <div className="space-y-1">
@@ -471,7 +471,7 @@ export const AdminDashboard = () => {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
                     placeholder="Leave empty for Central Scheme"
                   />
-                  {errors.state && <p className="text-xs text-red-500 font-semibold">{errors.state.message}</p>}
+                  {!!errors.state && <p className="text-xs text-red-500 font-semibold">{errors.state.message as string}</p>}
                 </div>
 
                 <div className="space-y-1">
@@ -482,7 +482,7 @@ export const AdminDashboard = () => {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
                     placeholder="https://pmkvydashboard.org"
                   />
-                  {errors.applicationUrl && <p className="text-xs text-red-500 font-semibold">{errors.applicationUrl.message}</p>}
+                  {!!errors.applicationUrl && <p className="text-xs text-red-500 font-semibold">{errors.applicationUrl.message as string}</p>}
                 </div>
               </div>
 
@@ -502,7 +502,7 @@ export const AdminDashboard = () => {
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white outline-none text-sm"
                       placeholder="e.g. 18"
                     />
-                    {errors.minAge && <p className="text-xs text-red-500">{errors.minAge.message}</p>}
+                    {!!errors.minAge && <p className="text-xs text-red-500">{errors.minAge.message as string}</p>}
                   </div>
 
                   <div className="space-y-1">
@@ -513,7 +513,7 @@ export const AdminDashboard = () => {
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white outline-none text-sm"
                       placeholder="e.g. 45"
                     />
-                    {errors.maxAge && <p className="text-xs text-red-500">{errors.maxAge.message}</p>}
+                    {!!errors.maxAge && <p className="text-xs text-red-500">{errors.maxAge.message as string}</p>}
                   </div>
 
                   <div className="space-y-1">
@@ -524,7 +524,7 @@ export const AdminDashboard = () => {
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white outline-none text-sm"
                       placeholder="₹ Limit"
                     />
-                    {errors.maxIncome && <p className="text-xs text-red-500">{errors.maxIncome.message}</p>}
+                    {!!errors.maxIncome && <p className="text-xs text-red-500">{errors.maxIncome.message as string}</p>}
                   </div>
 
                   <div className="space-y-1">
@@ -538,7 +538,7 @@ export const AdminDashboard = () => {
                       <option value="FEMALE">Female Only</option>
                       <option value="OTHER">Other Only</option>
                     </select>
-                    {errors.gender && <p className="text-xs text-red-500">{errors.gender.message}</p>}
+                    {!!errors.gender && <p className="text-xs text-red-500">{errors.gender.message as string}</p>}
                   </div>
                 </div>
 
@@ -551,7 +551,7 @@ export const AdminDashboard = () => {
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white outline-none text-sm"
                       placeholder="e.g. Farmer, Student, Leave empty for All"
                     />
-                    {errors.occupation && <p className="text-xs text-red-500">{errors.occupation.message}</p>}
+                    {!!errors.occupation && <p className="text-xs text-red-500">{errors.occupation.message as string}</p>}
                   </div>
 
                   <div className="flex items-center gap-3 pt-6">
@@ -577,7 +577,7 @@ export const AdminDashboard = () => {
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
                   placeholder="Provide details of monetary subsidies, insurance coverage, training stipends..."
                 />
-                {errors.benefits && <p className="text-xs text-red-500 font-semibold">{errors.benefits.message}</p>}
+                {!!errors.benefits && <p className="text-xs text-red-500 font-semibold">{errors.benefits.message as string}</p>}
               </div>
 
               {/* Required Documents List - Dynamic */}
@@ -616,8 +616,8 @@ export const AdminDashboard = () => {
                     </div>
                   ))}
                 </div>
-                {errors.documentsRequired && (
-                  <p className="text-xs text-red-500 font-semibold">{errors.documentsRequired.message}</p>
+                {!!errors.documentsRequired && (
+                  <p className="text-xs text-red-500 font-semibold">{errors.documentsRequired.message as string}</p>
                 )}
               </div>
 

@@ -16,6 +16,7 @@ export interface Scheme {
   documentsRequired: string[];
   applicationUrl: string;
   ministry: string;
+  isActive?: boolean;
 }
 
 export interface SchemesResponse {
