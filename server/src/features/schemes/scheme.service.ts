@@ -76,106 +76,148 @@ export class SchemeService {
     return scheme;
   }
 
-  static async matchEligibility(userId: string, data: { age: number; income: number; gender: string; state: string; occupation: string }) {
-    await User.findByIdAndUpdate(userId, {
-      age: data.age,
-      income: data.income,
-      gender: data.gender,
-      state: data.state,
-      occupation: data.occupation,
-    });
+  static evaluateEligibility(scheme: any, data: { age: number; income: number; gender: string; state: string; occupation: string }) {
+    const details: { criterion: string; passed: boolean; reason?: string }[] = [];
+    let totalApplicable = 0;
+    let totalPassed = 0;
 
+    // 1. Min Age Check
+    if (scheme.minAge != null) {
+      totalApplicable++;
+      const passed = data.age >= scheme.minAge;
+      if (passed) totalPassed++;
+      details.push({
+        criterion: 'minAge',
+        passed,
+        reason: passed ? undefined : `You must be at least ${scheme.minAge} years old (you are ${data.age})`,
+      });
+    }
+
+    // 2. Max Age Check
+    if (scheme.maxAge != null) {
+      totalApplicable++;
+      const passed = data.age <= scheme.maxAge;
+      if (passed) totalPassed++;
+      details.push({
+        criterion: 'maxAge',
+        passed,
+        reason: passed ? undefined : `Age limit is ${scheme.maxAge} years (you are ${data.age})`,
+      });
+    }
+
+    // 3. Max Income Check
+    if (scheme.maxIncome != null) {
+      totalApplicable++;
+      const passed = data.income <= scheme.maxIncome;
+      if (passed) totalPassed++;
+      details.push({
+        criterion: 'maxIncome',
+        passed,
+        reason: passed ? undefined : `Your annual income exceeds the limit by ₹${(data.income - scheme.maxIncome).toLocaleString('en-IN')}`,
+      });
+    }
+
+    // 4. Gender Check
+    if (scheme.gender && scheme.gender !== 'ALL') {
+      totalApplicable++;
+      const passed = scheme.gender.toUpperCase() === data.gender.toUpperCase();
+      if (passed) totalPassed++;
+      details.push({
+        criterion: 'gender',
+        passed,
+        reason: passed ? undefined : `Scheme is only available for ${scheme.gender} applicants (you selected ${data.gender})`,
+      });
+    }
+
+    // 5. State Check
+    if (scheme.state && scheme.state !== 'National') {
+      totalApplicable++;
+      const passed = scheme.state.toUpperCase() === data.state.toUpperCase();
+      if (passed) totalPassed++;
+      details.push({
+        criterion: 'state',
+        passed,
+        reason: passed ? undefined : `Scheme is only available in ${scheme.state} (you are in ${data.state})`,
+      });
+    }
+
+    // 6. Occupation Check
+    if (scheme.occupation && scheme.occupation !== '') {
+      totalApplicable++;
+      const passed = scheme.occupation.toUpperCase() === data.occupation.toUpperCase();
+      if (passed) totalPassed++;
+      details.push({
+        criterion: 'occupation',
+        passed,
+        reason: passed ? undefined : `Scheme is restricted to ${scheme.occupation} (you selected ${data.occupation})`,
+      });
+    }
+
+    const matchScore = totalApplicable === 0 ? 1 : totalPassed / totalApplicable;
+
+    return {
+      matchScore,
+      totalApplicable,
+      totalPassed,
+      details,
+    };
+  }
+
+  static async matchEligibility(userId: string, data: { age: number; income: number; gender: string; state: string; occupation: string }) {
     const schemes = await Scheme.find({ isActive: true }).lean();
 
     const scoredSchemes = schemes.map((scheme: any) => {
-      const details: { criterion: string; passed: boolean; reason?: string }[] = [];
-      let totalApplicable = 0;
-      let totalPassed = 0;
-
-      // 1. Min Age Check
-      if (scheme.minAge != null) {
-        totalApplicable++;
-        const passed = data.age >= scheme.minAge;
-        if (passed) totalPassed++;
-        details.push({
-          criterion: 'minAge',
-          passed,
-          reason: passed ? undefined : `You must be at least ${scheme.minAge} years old (you are ${data.age})`,
-        });
-      }
-
-      // 2. Max Age Check
-      if (scheme.maxAge != null) {
-        totalApplicable++;
-        const passed = data.age <= scheme.maxAge;
-        if (passed) totalPassed++;
-        details.push({
-          criterion: 'maxAge',
-          passed,
-          reason: passed ? undefined : `Age limit is ${scheme.maxAge} years (you are ${data.age})`,
-        });
-      }
-
-      // 3. Max Income Check
-      if (scheme.maxIncome != null) {
-        totalApplicable++;
-        const passed = data.income <= scheme.maxIncome;
-        if (passed) totalPassed++;
-        details.push({
-          criterion: 'maxIncome',
-          passed,
-          reason: passed ? undefined : `Your annual income exceeds the limit by ₹${(data.income - scheme.maxIncome).toLocaleString('en-IN')}`,
-        });
-      }
-
-      // 4. Gender Check
-      if (scheme.gender && scheme.gender !== 'ALL') {
-        totalApplicable++;
-        const passed = scheme.gender.toUpperCase() === data.gender.toUpperCase();
-        if (passed) totalPassed++;
-        details.push({
-          criterion: 'gender',
-          passed,
-          reason: passed ? undefined : `Scheme is only available for ${scheme.gender} applicants (you selected ${data.gender})`,
-        });
-      }
-
-      // 5. State Check
-      if (scheme.state && scheme.state !== 'National') {
-        totalApplicable++;
-        const passed = scheme.state.toUpperCase() === data.state.toUpperCase();
-        if (passed) totalPassed++;
-        details.push({
-          criterion: 'state',
-          passed,
-          reason: passed ? undefined : `Scheme is only available in ${scheme.state} (you are in ${data.state})`,
-        });
-      }
-
-      // 6. Occupation Check
-      if (scheme.occupation && scheme.occupation !== '') {
-        totalApplicable++;
-        const passed = scheme.occupation.toUpperCase() === data.occupation.toUpperCase();
-        if (passed) totalPassed++;
-        details.push({
-          criterion: 'occupation',
-          passed,
-          reason: passed ? undefined : `Scheme is restricted to ${scheme.occupation} (you selected ${data.occupation})`,
-        });
-      }
-
-      const matchScore = totalApplicable === 0 ? 1 : totalPassed / totalApplicable;
-
+      const evaluation = SchemeService.evaluateEligibility(scheme, data);
       return {
         ...scheme,
-        matchScore,
-        totalApplicable,
-        totalPassed,
-        details,
+        ...evaluation,
       };
     });
 
     return scoredSchemes.sort((a, b) => b.matchScore - a.matchScore);
+  }
+
+  static async notifyUsersForNewScheme(schemeId: string) {
+    try {
+      const scheme = await Scheme.findById(schemeId).lean();
+      if (!scheme || !scheme.isActive) return;
+
+      const users = await User.find({
+        age: { $ne: null },
+        income: { $ne: null },
+        gender: { $ne: null },
+        state: { $ne: null },
+        occupation: { $ne: null },
+      }).lean();
+
+      const notificationsToInsert = [];
+
+      for (const user of users) {
+        const evaluation = SchemeService.evaluateEligibility(scheme, {
+          age: user.age!,
+          income: user.income!,
+          gender: user.gender!,
+          state: user.state!,
+          occupation: user.occupation!,
+        });
+
+        if (evaluation.matchScore >= 0.7) {
+          notificationsToInsert.push({
+            userId: user._id,
+            schemeId: scheme._id,
+            type: 'NEW_SCHEME_MATCH',
+            message: `New matching scheme: "${scheme.title}" matches your profile (${Math.round(evaluation.matchScore * 100)}% match).`,
+          });
+        }
+      }
+
+      if (notificationsToInsert.length > 0) {
+        const { Notification } = await import('../../models/Notification');
+        await Notification.insertMany(notificationsToInsert);
+      }
+    } catch (error) {
+      console.error('Error sending notifications for new scheme:', error);
+    }
   }
 
   static async createScheme(data: any) {
@@ -199,6 +241,12 @@ export class SchemeService {
 
     const created = await Scheme.create({ ...data, slug });
     await this.invalidateCache();
+    
+    // Trigger notifications asynchronously (fire-and-forget)
+    this.notifyUsersForNewScheme(created._id.toString()).catch((err) => {
+      console.error('Asynchronous scheme notification dispatch failed:', err);
+    });
+
     return created.toObject();
   }
 

@@ -9,6 +9,8 @@ import { authRouter } from './features/auth/auth.routes';
 import { schemeRouter } from './features/schemes/scheme.routes';
 import { bookmarksRouter } from './features/bookmarks/bookmarks.routes';
 import { trackerRouter } from './features/tracker/tracker.routes';
+import { profileRouter } from './features/profile/profile.routes';
+import { notificationsRouter } from './features/notifications/notifications.routes';
 
 const app = express();
 
@@ -31,6 +33,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/schemes', schemeRouter);
 app.use('/api/bookmarks', bookmarksRouter);
 app.use('/api/tracker', trackerRouter);
+app.use('/api/profile', profileRouter);
+app.use('/api/notifications', notificationsRouter);
 
 // Error handler
 app.use(errorHandler);

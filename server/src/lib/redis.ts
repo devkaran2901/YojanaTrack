@@ -3,7 +3,8 @@ import { env } from '../config/env';
 import { logger } from './logger';
 
 export const redis = new Redis(env.REDIS_URL, {
-  maxRetriesPerRequest: null,
+  maxRetriesPerRequest: 1,
+  enableOfflineQueue: false,
 });
 
 redis.on('error', (err) => {

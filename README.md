@@ -12,6 +12,8 @@ eligibility criteria.
 ## ✨ Features
 - 🔍 Search and filter government schemes by category, state, and eligibility
 - 📋 Detailed scheme pages with benefits, documents required, and application process
+- 👤 Standalone Profile Management — intentional citizen profile fields (age, income, gender, state, occupation) with strict Zod validation bounds
+- 🔔 Smart New Scheme Notifications — automatic in-app notification alerts matching citizens profile criteria (≥70% score match) upon scheme creation
 - 🔖 Save and track schemes you're interested in
 - 👤 User authentication and personal dashboard
 - 📱 Responsive design for mobile and desktop
@@ -52,6 +54,7 @@ cd client && npm run dev
 
 To keep the application honest about its current state and outline clear directions for production scaling, we have documented the following architectural constraints and roadmap items:
 
+- **Notification Discovery Limits**: The scheme matching notification system currently covers admin-added schemes only. Automatic discovery and notification of new schemes from external feeds/sources remains a future integration pending a stable national data feed.
 - **Static Seed Data vs. Live Integrations**: Currently, schemes are manually seeded and updated by administrators. The next phase is to integrate with government endpoints or deploy scrapers to automatically synchronize with active central/state database registries.
 - **Rule-Based Matching vs. ML Recommendation**: Eligibility checks are computed using structured rule matching based on specific criteria. Future improvements will utilize machine learning models to suggest schemes based on historical demographics and correlation vectors.
 - **Localization (i18n)**: Currently, the portal is English-only. Translating the portal to Hindi and other regional languages (e.g. Marathi, Tamil) is a priority to make it fully accessible to the general public.
