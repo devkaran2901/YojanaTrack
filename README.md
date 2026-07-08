@@ -1,70 +1,35 @@
-# YojanaTrack 🇮🇳
+# YojanaTrack
 
-YojanaTrack is a fullstack web application that helps Indian citizens
-discover, explore, and keep track of government schemes (Yojanas) they
-are eligible for — all in one place.
+YojanaTrack is a full-stack MERN application that helps Indian citizens discover 
+government welfare schemes they're actually eligible for — not just search by keyword.
 
-Built as an alternative interface to fragmented government portals,
-YojanaTrack simplifies the process of finding relevant central and
-state government schemes based on user profile, category, and
-eligibility criteria.
+Instead of a binary "eligible / not eligible" result, YojanaTrack scores how well a 
+user matches each scheme, explains exactly which criteria they fail and by how much, 
+and proactively notifies matching users when a new scheme is added — turning a static 
+directory into a system that actively works on the citizen's behalf.
 
-## ✨ Features
-- 🔍 Search and filter government schemes by category, state, and eligibility
-- 📋 Detailed scheme pages with benefits, documents required, and application process
-- 👤 Standalone Profile Management — intentional citizen profile fields (age, income, gender, state, occupation) with strict Zod validation bounds
-- 🔔 Smart New Scheme Notifications — automatic in-app notification alerts matching citizens profile criteria (≥70% score match) upon scheme creation
-- 🔖 Save and track schemes you're interested in
-- 👤 User authentication and personal dashboard
-- 📱 Responsive design for mobile and desktop
+## Features
+- Rule-based eligibility scoring engine — schemes are ranked by match score (not just 
+  filtered in/out), with per-criterion pass/fail feedback so users know exactly what's 
+  missing
+- Automated new-scheme notifications — when an admin adds a scheme, it's matched 
+  against every user's profile in the background and eligible users are notified in-app
+- Standalone profile management — intentional, validated citizen profile (age, income, 
+  gender, state, occupation) reused by both the scoring engine and the notification 
+  system
+- Redis-cached scheme search — TTL-based caching with write-through invalidation on 
+  scheme create/update/delete
+- Search and filter schemes by category, state, and eligibility
+- Detailed scheme pages with benefits, required documents, and application process
+- Save and track schemes, including an application tracker with deadline checks
+- JWT authentication with refresh token rotation
+- Admin dashboard for scheme management
 
-## 🛠️ Tech Stack
-- **Frontend:** React, Vite, TypeScript, Vanilla CSS, TailwindCSS (optional/configured)
-- **Backend:** Node.js, Express, TypeScript, Zod request validation
-- **Database:** MongoDB + Mongoose
-- **Caching:** Redis (gracefully degrading key-value store)
-- **Testing:** Jest + Supertest (sequential execution with `--runInBand`)
-- **CI/CD:** GitHub Actions (compilation & automated test runners)
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js >= 18
-- npm or yarn
-
-### Installation
-# Clone the repo
-git clone https://github.com/devkaran2901/YojanaTrack.git
-cd YojanaTrack
-
-# Install client dependencies
-cd client && npm install
-
-# Install server dependencies
-cd ../server && npm install
-
-### Running Locally
-# Start backend
-cd server && npm run dev
-
-# Start frontend (new terminal)
-cd client && npm run dev
-
-## 🗺️ Known Limitations & Future Roadmap
-
-To keep the application honest about its current state and outline clear directions for production scaling, we have documented the following architectural constraints and roadmap items:
-
-- **Notification Discovery Limits**: The scheme matching notification system currently covers admin-added schemes only. Automatic discovery and notification of new schemes from external feeds/sources remains a future integration pending a stable national data feed.
-- **Static Seed Data vs. Live Integrations**: Currently, schemes are manually seeded and updated by administrators. The next phase is to integrate with government endpoints or deploy scrapers to automatically synchronize with active central/state database registries.
-- **Rule-Based Matching vs. ML Recommendation**: Eligibility checks are computed using structured rule matching based on specific criteria. Future improvements will utilize machine learning models to suggest schemes based on historical demographics and correlation vectors.
-- **Localization (i18n)**: Currently, the portal is English-only. Translating the portal to Hindi and other regional languages (e.g. Marathi, Tamil) is a priority to make it fully accessible to the general public.
-- **Infrastructure Scaling**: The app currently assumes a single-region deployment. Multi-region DB replication and CDN edge caching are planned to support high concurrent usage across different Indian states.
-- **Production Notification Scheduler**: The daily deadline checking mechanism runs via a scheduled GitHub Action scaffold. In production, this will be migrated to a dedicated worker scheduler (e.g. BullMQ / Redis) triggering a transactional mailer service (e.g. SendGrid).
-
-## 📌 Inspired By
-The gaps found in myscheme.gov.in — built to provide a faster,
-more accessible, and user-friendly experience for citizens
-navigating India's government welfare ecosystem.
-
-## 📄 License
-MIT
+## Tech Stack
+- Frontend: React, Vite, TypeScript, TailwindCSS
+- Backend: Node.js, Express, TypeScript, Zod request validation
+- Database: MongoDB + Mongoose
+- Caching: Redis (TTL + write-through invalidation, graceful degradation on failure)
+- Testing: Jest + Supertest, 33 tests covering auth, schemes, profile, notifications, 
+  and caching behavior
+- CI/CD: GitHub Actions (lint, test, build on every push)
